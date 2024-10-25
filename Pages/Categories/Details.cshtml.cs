@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Paven_Darius_Lab2.Data;
 using Paven_Darius_Lab2.Models;
 
-namespace Paven_Darius_Lab2.Pages.Books
+namespace Paven_Darius_Lab2.Pages.Categories
 {
     public class DetailsModel : PageModel
     {
@@ -19,7 +19,7 @@ namespace Paven_Darius_Lab2.Pages.Books
             _context = context;
         }
 
-        public Book Book { get; set; } = default!;
+        public Category Category { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -28,19 +28,14 @@ namespace Paven_Darius_Lab2.Pages.Books
                 return NotFound();
             }
 
-            Book = await _context.Book
-                .Include(b => b.Author)
-                .Include(b => b.Publisher)
-                .Include(b => b.BookCategories) 
-                    .ThenInclude(bc => bc.Category) 
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (Book == null)
+            var category = await _context.Category.FirstOrDefaultAsync(m => m.ID == id);
+            if (category == null)
             {
                 return NotFound();
             }
             else
             {
-                Book = Book;
+                Category = category;
             }
             return Page();
         }
