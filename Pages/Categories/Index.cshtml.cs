@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Paven_Darius_Lab2.Data;
 using Paven_Darius_Lab2.Models;
+using Paven_Darius_Lab2.Models.ViewModels;
 
 namespace Paven_Darius_Lab2.Pages.Categories
 {
@@ -19,11 +20,28 @@ namespace Paven_Darius_Lab2.Pages.Categories
             _context = context;
         }
 
-        public IList<Category> Category { get;set; } = default!;
+        public CategoryIndexData CategoryData { get; set; }
+        public int CategoryID { get; set; }
 
-        public async Task OnGetAsync()
+        public IList<Category> Category { get; set; } = default!;
+
+        public async Task OnGetAsync(int? id)
         {
             Category = await _context.Category.ToListAsync();
+            CategoryData = new CategoryIndexData();
+            CategoryData.Categories = await _context.Category
+                .Include(c => c.BookCategories)
+                .ThenInclude(bc => bc.Book)
+                .ThenInclude(b => b.Author)
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+            if (id != null)
+            {
+                CategoryID = id.Value;
+                var category = CategoryData.Categories
+                    .Where(c => c.ID == id.Value).Single();
+                CategoryData.Books = category.BookCategories.Select(bc => bc.Book);
+            }
         }
     }
 }
